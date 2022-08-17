@@ -1,18 +1,16 @@
-function  LTmin = Minimum_masking_threshold(LTg, Map)
-%LTmin = Minimum_masking_threshold(LTg, Map)
+%   This sets the `global' variables use in the other functions.
+%   They correspond to MPEG audio layer I with psychoacoustic model 1
+%   as described in [1].
 %
-%   Find the minimum of the global masking threshold for each subband.
-%   [1, pp. 114]
-%
-%   See also Global_masking_threshold
+%   See also 
    
 %   Author: Fabien A. P. Petitcolas
 %           Computer Laboratory
 %           University of Cambridge
 %
 %   Copyright (c) 1998--2001 by Fabien A. P. Petitcolas
-%   $Header: /Matlab MPEG/Minimum_masking_threshold.m 3     7/07/01 1:27 Fabienpe $
-%   $Id: Minimum_masking_threshold.m,v 1.2 1998-06-22 17:47:56+01 fapp2 Exp $
+%   $Header: /Matlab MPEG/Common.m 3     7/07/01 1:27 Fabienpe $
+%   $Id: Common.m,v 1.4 1998-07-07 14:39:54+01 fapp2 Exp $
 
 %   References:
 %    [1] Information technology -- Coding of moving pictures and associated
@@ -30,17 +28,28 @@ function  LTmin = Minimum_masking_threshold(LTg, Map)
 %    postal box 56, CH-1211 Geneva 20, Telephone +41 22 749 0111, Telefax
 %    +4122 734 1079. Copyright remains with ISO.
 %-------------------------------------------------------------------------------
-Common;
 
-Subband_size = FFT_SIZE / 2 / N_SUBBAND;
+FFT_SHIFT   = 384;
+FFT_SIZE    = 512;
+FFT_OVERLAP = (FFT_SIZE - FFT_SHIFT) / 2;
 
-for n = 1:N_SUBBAND, % For each subband
-   
-   LTmin(n) = LTg(Map((n - 1) * Subband_size + 1));
-   
-   for j = 2:Subband_size, % Try all the samples in this subband
-      if (LTg(Map((n - 1) * Subband_size + j)) < LTmin(n))
-         LTmin(n) = LTg(Map((n - 1) * Subband_size + j));
-      end
-   end
-end
+N_SUBBAND = 32;
+
+% Flags for tonal analysis
+NOT_EXAMINED = 0;
+TONAL        = 1;
+NON_TONAL    = 2;
+IRRELEVANT   = 3;
+
+MIN_POWER = -200;
+
+% Set to one to see the graphs and explanation text
+DRAW = 1;
+
+% Indices used in tables like the threshold table
+% or in the list of tonal and non-tonal components.
+INDEX = 1;
+BARK  = 2;
+SPL   = 2;
+ATH   = 3;
+

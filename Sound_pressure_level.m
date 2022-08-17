@@ -1,18 +1,19 @@
-function  LTmin = Minimum_masking_threshold(LTg, Map)
-%LTmin = Minimum_masking_threshold(LTg, Map)
+function Lsb = Sound_pressure_level(X, scf)
+%X = Sound_pressure_level(X, scf)
 %
-%   Find the minimum of the global masking threshold for each subband.
-%   [1, pp. 114]
+%   The sound pressure level Lsb is computed for every subband.
+%   X is the normalised power density spectrum and scf are the 32 scale
+%   factors (one per band).
 %
-%   See also Global_masking_threshold
+%   See also  Scale_factors
    
 %   Author: Fabien A. P. Petitcolas
 %           Computer Laboratory
 %           University of Cambridge
 %
 %   Copyright (c) 1998--2001 by Fabien A. P. Petitcolas
-%   $Header: /Matlab MPEG/Minimum_masking_threshold.m 3     7/07/01 1:27 Fabienpe $
-%   $Id: Minimum_masking_threshold.m,v 1.2 1998-06-22 17:47:56+01 fapp2 Exp $
+%   $Header: /Matlab MPEG/Sound_pressure_level.m 3     7/07/01 1:27 Fabienpe $
+%   $Id: Sound_pressure_level.m,v 1.2 1998-06-22 17:47:56+01 fapp2 Exp $
 
 %   References:
 %    [1] Information technology -- Coding of moving pictures and associated
@@ -32,15 +33,25 @@ function  LTmin = Minimum_masking_threshold(LTg, Map)
 %-------------------------------------------------------------------------------
 Common;
 
-Subband_size = FFT_SIZE / 2 / N_SUBBAND;
+% Check input parameters
+if (length(X) ~= FFT_SIZE)
+   error('Unexpected power density spectrum size.');
+end
 
-for n = 1:N_SUBBAND, % For each subband
-   
-   LTmin(n) = LTg(Map((n - 1) * Subband_size + 1));
-   
-   for j = 2:Subband_size, % Try all the samples in this subband
-      if (LTg(Map((n - 1) * Subband_size + j)) < LTmin(n))
-         LTmin(n) = LTg(Map((n - 1) * Subband_size + j));
-      end
+if (length(scf) ~= N_SUBBAND)
+   error('Unexpected number of scalefactors');
+end
+
+% Pick the 32 sound pressure level of the spectral line with maximum amplitude
+% in the frequency range corresponding to subband i and compute the
+% sound pressure level Lsb.
+Xmin = min(X);
+n = FFT_SIZE / 2 / N_SUBBAND; % Size of each subband
+
+for i = 1:N_SUBBAND,
+   local_max = Xmin;
+   for j = 1:n,
+      local_max = max(X((i - 1) * n + j), local_max);
    end
+   Lsb(i) = max(local_max, 20 * log10(scf(i) * 32768) - 10);
 end

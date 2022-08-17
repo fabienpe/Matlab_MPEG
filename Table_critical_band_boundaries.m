@@ -1,18 +1,18 @@
-function  LTmin = Minimum_masking_threshold(LTg, Map)
-%LTmin = Minimum_masking_threshold(LTg, Map)
+function CB = Table_critical_band_boundaries(Layer, fs)
+%CB = Table_crital_band_boundaries(Layer, fs)
 %
-%   Find the minimum of the global masking threshold for each subband.
-%   [1, pp. 114]
+%   Return the index in the absolute threshold table for the critical band 
+%   boundaries definied in [1, pp. 123] for Layer at sampling rate fs (Hz).
 %
-%   See also Global_masking_threshold
+%   See also Table_absolute_threshold
    
 %   Author: Fabien A. P. Petitcolas
 %           Computer Laboratory
 %           University of Cambridge
 %
 %   Copyright (c) 1998--2001 by Fabien A. P. Petitcolas
-%   $Header: /Matlab MPEG/Minimum_masking_threshold.m 3     7/07/01 1:27 Fabienpe $
-%   $Id: Minimum_masking_threshold.m,v 1.2 1998-06-22 17:47:56+01 fapp2 Exp $
+%   $Header: /Matlab MPEG/Table_critical_band_boundaries.m 3     7/07/01 1:27 Fabienpe $
+%   $Id: Table_critical_band_boundaries.m,v 1.2 1998-06-22 17:47:56+01 fapp2 Exp $
 
 %   References:
 %    [1] Information technology -- Coding of moving pictures and associated
@@ -30,17 +30,14 @@ function  LTmin = Minimum_masking_threshold(LTg, Map)
 %    postal box 56, CH-1211 Geneva 20, Telephone +41 22 749 0111, Telefax
 %    +4122 734 1079. Copyright remains with ISO.
 %-------------------------------------------------------------------------------
-Common;
 
-Subband_size = FFT_SIZE / 2 / N_SUBBAND;
-
-for n = 1:N_SUBBAND, % For each subband
-   
-   LTmin(n) = LTg(Map((n - 1) * Subband_size + 1));
-   
-   for j = 2:Subband_size, % Try all the samples in this subband
-      if (LTg(Map((n - 1) * Subband_size + j)) < LTmin(n))
-         LTmin(n) = LTg(Map((n - 1) * Subband_size + j));
-      end
-   end
-end
+if (Layer == 1)
+   if (fs == 44100)
+      CB = [1, 2, 3, 5, 6, 8, 9, 11, 13, 15, 17, 20, 23, 27, 32, 37, 45, 50, 55, 61, 68, 75, 81, 93, 106]';
+    else
+       error('Frequency not supported.');
+    end
+ else
+    error('Layer not supported.');
+ end
+ 
